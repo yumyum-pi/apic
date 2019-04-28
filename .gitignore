@@ -1,0 +1,5 @@
+# ignore mac file storage file
+.DS_Store
+
+# ignore vendor files
+vendor/*
