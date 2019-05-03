@@ -9,32 +9,40 @@ import (
 	"github.com/yumyum-pi/apic/cli/utility"
 )
 
-const serverFileName = "main"
-const serverPath = "./"
-
-var serverFilePath = fmt.Sprintf("%v%v.go", serverPath, serverFileName)
-
 func main() {
+	args.Init()
 	// create a new flag
-	createServer := flag.NewFlagSet("createServer", flag.ExitOnError)
+	createEndPoint := flag.NewFlagSet("endPoint", flag.ExitOnError)
+	createServer := flag.NewFlagSet("server", flag.ExitOnError)
+	testEndPoint := flag.NewFlagSet("test", flag.ExitOnError)
 
-	//argument for createServer
-	port := createServer.String("p", "8080", "Port no. for the server")
-	IP := createServer.String("ip", "", "IP address for the server")
-
+	// createRoute subcommand flag pointers
+	name := createEndPoint.String("n", "", "name of the route")
 	if len(os.Args) == 1 {
 		fmt.Println("use --help to find info on options")
 		return
 	}
 
 	switch os.Args[1] {
-	case "createServer":
+	case "server":
 		createServer.Parse(os.Args[2:])
+	case "endPoint":
+		createEndPoint.Parse(os.Args[2:])
+	case "test":
+		testEndPoint.Parse(os.Args[2:])
 	default:
 		utility.Exit(fmt.Errorf("%q is not valid command", os.Args[1]), 2)
 	}
 
 	if createServer.Parsed() {
-		args.CreateServer(serverFilePath, port, IP)
+		args.CreateServer()
+	} else if createEndPoint.Parsed() {
+		if *name != "" {
+			args.CreateEndPoint(*name)
+		} else {
+			utility.Exit(fmt.Errorf("-n cannot be empty"), 2)
+		}
+	} else if testEndPoint.Parsed() {
+		args.Test()
 	}
 }

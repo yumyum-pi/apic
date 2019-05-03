@@ -1,0 +1,53 @@
+// Get/*ModelName*/ will return an /*modelName*/ with the given ID
+func (m */*ModelName*/) Get/*ModelName*/(db *sql.DB) error {
+	statement := fmt.Sprintf("SELECT /*varList*/ FROM /*modelName*/ WHERE id=%d", m.ID)
+	return db.QueryRow(statement).Scan(/*&mVarList*/)
+}
+ 
+// Update/*ModelName*/ will update the /*modelName*/ info with the given ID
+func (m */*ModelName*/) Update/*ModelName*/(db *sql.DB) error {
+	statement := fmt.Sprintf("UPDATE /*modelName*/ SET /*varListEq*/ WHERE id=%d", /*mVarList*/, m.ID)
+	_, err := db.Exec(statement)
+	return err
+}
+
+// Delete/*ModelName*/ will detele the /*modelName*/ with the given id
+func (m */*ModelName*/) Delete/*ModelName*/(db *sql.DB) error {
+	statement := fmt.Sprintf("DELETE FROM /*modelName*/ WHERE id=%d", m.ID)
+	_, err := db.Exec(statement)
+	return err
+}
+
+// Create/*ModelName*/ will create /*modelName*/ with given info
+func (m */*ModelName*/) Create/*ModelName*/(db *sql.DB) error {
+	statement := fmt.Sprintf("INSERT INTO /*modelName*/ (/*varList*/) VALUES(/*eq*/)", /*mVarList*/)
+	_, err := db.Exec(statement)
+	if err != nil {
+		return err
+	}
+	err = db.QueryRow("SELECT LAST_INSERT_ID()").Scan(&m.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
+// Get/*ModelName*/ will give all  the /*modelName*/ info
+func Get/*ModelName*/(db *sql.DB, start, count int) ([]/*ModelName*/, error) {
+	statement := fmt.Sprintf("SELECT id, /*varList*/ FROM /*modelName*/ LIMIT %d OFFSET %d", count, start)
+	rows, err := db.Query(statement)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ms := []/*ModelName*/{}
+	for rows.Next() {
+		var m /*ModelName*/
+		if err := rows.Scan(&m.ID, /*&mVarList*/); err != nil {
+			return nil, err
+		}
+		ms = append(ms, m)
+	}
+	return ms, nil
+}

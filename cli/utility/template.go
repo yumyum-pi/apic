@@ -22,11 +22,9 @@ func NewTempVar(key, value string) TempVar {
 // TempVars is an arry of Template variables
 type TempVars []TempVar
 
-const tempVarComment = "//--->"
-
 // return a valid tempVarName
 func tempVarName(varName string) string {
-	return fmt.Sprintf("%v%v", tempVarComment, varName)
+	return fmt.Sprintf("/*%v*/", varName)
 }
 
 // Template function generates string from template file and template variables

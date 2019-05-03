@@ -4,21 +4,44 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	"/*MYPATH*/model/db"
+	rs "/*MYPATH*/route"
 )
 
-//--->port
-//--->ip
+var ip string
+var port string
 
+// Init Initialization of the API sever
+func Init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	ip = os.Getenv("API_IP")
+	port = os.Getenv("API_PORT")
+}
 func welcomeToAPI(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome to the api")
 }
 
 func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/", welcomeToAPI).Methods("GET")
-	//--->route
-	serverURL := fmt.Sprintf("%v:%v", ip, port)
-	log.Fatal(http.ListenAndServe(serverURL, router))
+	Init()
+	
+	r := mux.NewRouter()
+	r.HandleFunc("/", welcomeToAPI).Methods("GET")
+	
+	// Initialization of Database
+	db.Init()
+
+	/*route*/
+	
+	// Start server
+	addr := fmt.Sprintf("%s:%s", ip, port)
+	fmt.Printf(" > starting server @ %v\n", addr)
+	log.Fatal(http.ListenAndServe(addr, r))
 }

@@ -1,0 +1,126 @@
+package routes
+
+import (
+	"database/sql"
+	"encoding/json"
+	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
+	"/*MYPATH*/model"
+	"/*MYPATH*/model/db"
+	"/*MYPATH*/route/utility"
+)
+
+var database *sql.DB
+
+// get /*modelName*/
+func getOne/*ModelName*/(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		utility.RespondWithError(w, http.StatusBadRequest, "Invalid /*modelName*/ ID")
+		return
+	}
+	u := model./*ModelName*/{ID: id}
+	if err := u.Get/*ModelName*/(database); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			utility.RespondWithError(w, http.StatusNotFound, "/*ModelName*/ not found")
+		default:
+			utility.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+	utility.RespondWithJSON(w, http.StatusOK, u)
+}
+
+func get/*ModelName*/(w http.ResponseWriter, r *http.Request) {
+	count, _ := strconv.Atoi(r.FormValue("count"))
+	start, _ := strconv.Atoi(r.FormValue("start"))
+	if count > 10 || count < 1 {
+		count = 10
+	}
+	if start < 0 {
+		start = 0
+	}
+	/*modelName*/, err := model.Get/*ModelName*/(database, start, count)
+	if err != nil {
+		utility.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utility.RespondWithJSON(w, http.StatusOK, /*modelName*/)
+}
+
+func create/*ModelName*/(w http.ResponseWriter, r *http.Request) {
+	var u model./*ModelName*/
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&u); err != nil {
+		utility.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer r.Body.Close()
+	if err := u.Create/*ModelName*/(database); err != nil {
+		utility.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utility.RespondWithJSON(w, http.StatusCreated, u)
+}
+
+func update/*ModelName*/(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		utility.RespondWithError(w, http.StatusBadRequest, "Invalid /*modelName*/ ID")
+		return
+	}
+	var u model./*ModelName*/
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&u); err != nil {
+		utility.RespondWithError(w, http.StatusBadRequest, "Invalid resquest payload")
+		return
+	}
+	defer r.Body.Close()
+	u.ID = id
+	if err := u.Update/*ModelName*/(database); err != nil {
+		utility.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utility.RespondWithJSON(w, http.StatusOK, u)
+}
+
+func delete/*ModelName*/(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		utility.RespondWithError(w, http.StatusBadRequest, "Invalid /*ModelName*/ ID")
+		return
+	}
+	u := model./*ModelName*/{ID: id}
+	if err := u.Delete/*ModelName*/(database); err != nil {
+		utility.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utility.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+}
+
+// /*ModelName*/Router handles all the employrouter
+func /*ModelName*/Router(r *mux.Router) {
+	r.HandleFunc("/", get/*ModelName*/).Methods("GET")
+	r.HandleFunc("/", create/*ModelName*/).Methods("POST")
+	r.HandleFunc("/{id:[0-9]+}", getOne/*ModelName*/).Methods("GET")
+	r.HandleFunc("/{id:[0-9]+}", update/*ModelName*/).Methods("PUT")
+	r.HandleFunc("/{id:[0-9]+}", delete/*ModelName*/).Methods("DELETE")
+}
+
+// /*ModelName*/RouteInit interlistion the database variable
+func /*ModelName*/RouteInit() {
+	database = db.GetDB()
+}
+
+//--->
+	//Initialization and adding route for /*modelName*/
+	rs./*ModelName*/RouteInit()
+	rs./*ModelName*/Router(r.PathPrefix("/api//*modelName*/").Subrouter())
+
+	/*route*/
